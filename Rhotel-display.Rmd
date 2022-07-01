@@ -1,0 +1,153 @@
+---
+title: "Data analysis- Hotel bookings"
+author: "Jayesh Chaudhari"
+date: '2022-06-13'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>. 
+
+### Loading libraries 
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(skimr)
+```
+
+### Importing .csv file into the project
+
+```{r}
+hotel_bookings<-read_csv("hotel_bookings.csv")
+```
+
+### Overview of first 6 rows of the dataframe
+
+```{r echo=FALSE}
+head(hotel_bookings)
+```
+
+### Basic information about dataframe
+
+```{r echo=FALSE}
+glimpse(hotel_bookings)
+```
+
+### Statistics of variable: lead time
+
+```{r echo=FALSE}
+print(paste("Maximum lead time: ", max(hotel_bookings$lead_time)))
+print(paste("Mean of lead time: ", mean(hotel_bookings$lead_time)))
+```
+
+### Combined(Grouped) data of hotels
+
+```{r warning=FALSE}
+hotel_bookings %>% 
+  group_by(hotel) %>% 
+  summarise(average_lead_time=mean(lead_time),
+            max_lead_time=max(lead_time),
+            min_lead_time=min(lead_time))
+```
+
+### Some visual analysis and insights
+
+
+#### First
+
+1. Hypothesis: I have a hypothesis that people with children have to book in advance.
+
+
+To check this we will need to plot a scattered plot of number of children v/s lead time
+
+```{r warning=FALSE}
+ggplot(data=hotel_bookings)+
+  geom_point(mapping=aes(x=lead_time, y=children))
+```
+
+Conclusion: As the number of children decrease with the increase in lead time, we can predict that more the number of children, less the lead time (booking in advance). Thus, people with children do not have to book in advance.
+Therefore, our hypothesis is wrong.
+
+
+#### Second
+
+2. Which group should be the target audience for weekend bookings? Children or adults?
+
+We will plot a scattered plot- number of children v/s stays in weekend nights.
+
+```{r warning=FALSE}
+ggplot(data=hotel_bookings)+
+  geom_point(mapping=aes(x=stays_in_weekend_nights, y=children))
+```
+
+Conclusion: As the number of children decreases with increase in number of stays, we can assume that children do not stay longer at the weekends. Therefore, our target audience for weekend bookings should be adults.
+
+
+#### Third
+
+3. To find which distribution channel has maximum bookings and of which deposit type.
+```{r}
+ggplot(data=hotel_bookings) +
+  geom_bar(mapping=aes(x=distribution_channel, fill=deposit_type))
+
+ggplot(data=hotel_bookings) +
+  geom_bar(mapping=aes(x=distribution_channel))+
+  facet_grid(~deposit_type)+
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+Conclusion: We can see from both visual plots (Bar graphs) that bookings are maximum from TA/TO distribution channel when deposit type is 'No deposit'.
+
+Therefore, promotional campaign should be directed towards TA/TO distribution channel.
+
+
+#### Fourth
+
+4. Which market segments generate the largest number of bookings?
+
+```{r}
+ggplot(data = hotel_bookings) +
+  geom_bar(mapping = aes(x = hotel, fill = market_segment))+
+  facet_wrap(~market_segment)+
+  theme(axis.text.x = element_text(angle = 30))
+```
+
+Conclusion: We can see that maximum booking occurs for the market segment: Online TA for the City Hotel. 
+
+Therefore, we'll increase our promotion for Online TA market segment. 
+
+
+#### Fifth
+
+5. Your stakeholder asks if you can create a plot that shows the relationship
+between lead time and guests traveling with children for online bookings at city hotels. This will give us a better idea of the specific timing for the promotion.
+
+```{r}
+online_city_hotels<- hotel_bookings %>% 
+  filter(market_segment=="Online TA", hotel=="City Hotel")
+
+ggplot(data=online_city_hotels)+
+  geom_point(mapping=aes(x=lead_time, y=children))
+```
+
+
+Conclusion: For maximum number of children we can see that advance booking started with lead time around 200 hours. Therefore, the timing of promotion should be around 200 hours before the respective event or occasion.
+
+###### Stakeholder's problems are solved and analysed through statistical and visual representations in this analysis report. This report provides useful insights for promotional timing, target customers, market segment, essential distribution channels and many more.
+
+FIN
+
+
+
+
+
+
+
+
+
